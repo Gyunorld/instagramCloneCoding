@@ -9,18 +9,10 @@ import SwiftUI
 import PhotosUI
 
 struct NewPostView: View {
-    @State var caption = ""
     @Binding var tabIndex : Int
-    @State var selectedItem: PhotosPickerItem?
-    @State var postImage: Image?
     
-    func convertImage(item: PhotosPickerItem?) async {
-        guard let item = item else { return }
-        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
-        guard let uiImage = UIImage(data: data) else { return }
-        self.postImage = Image(uiImage: uiImage)
-        
-    }
+    @State var viewModel = NewPostViewModel()
+    
     var body: some View {
         VStack {
             HStack {
@@ -39,8 +31,8 @@ struct NewPostView: View {
             }
             .padding(.horizontal)
             
-            PhotosPicker(selection: $selectedItem){
-                if let image = self.postImage { // self.postImage가 nil이 아니면, photosPicker로 사진을 장착한 후
+            PhotosPicker(selection: $viewModel.selectedItem){
+                if let image = self.viewModel.postImage { // self.postImage가 nil이 아니면, photosPicker로 사진을 장착한 후
                     image
                         .resizable()
 //                        .aspectRatio(1, contentMode: .fit)  // 가로세로 비율
@@ -58,19 +50,24 @@ struct NewPostView: View {
                         .tint(.black)
                 }
             }
-            .onChange(of: selectedItem) { oldValue, newValue in
+            .onChange(of: viewModel.selectedItem) { oldValue, newValue in
                 Task {
-                    await convertImage(item: newValue)
+                    await viewModel.convertImage(item: newValue)
                 }
             }
             
-            TextField("문구를 작성하거나 설문을 추가하세요...", text: $caption) // 바인딩해서 넣어줘야함 -> 빈 문자열이기 때문에
+            TextField("문구를 작성하거나 설문을 추가하세요...", text: $viewModel.caption) // 바인딩해서 넣어줘야함 -> 빈 문자열이기 때문에
                 .padding()
             
             Spacer()
 
             Button{
                 print("사진 공유")
+                Task {
+                    await viewModel.uploadPost()
+                    viewModel.clearData()
+                    tabIndex = 0
+                }
             } label: {
                 Text("공유")
                     .frame(width: 363, height: 42)
