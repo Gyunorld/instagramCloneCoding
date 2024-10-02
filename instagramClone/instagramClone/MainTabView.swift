@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct MainTabView: View {
     @State var tabIndex = 0
@@ -27,11 +28,18 @@ struct MainTabView: View {
                     Image(systemName: "plus.square")
                 }
                 .tag(2)
-            Text("Reels")
-                .tabItem {
-                    Image(systemName: "movieclapper")
+            VStack {
+                Text("Reels")
+                Button {
+                    AuthManager.shared.signout()
+                } label: {
+                    Text("로그아웃")
                 }
-                .tag(3)
+            }
+                    .tabItem {
+                        Image(systemName: "movieclapper")
+                    }
+                    .tag(3)
             Text("Profile")
                 .tabItem {
                     Image(systemName: "person.circle")
