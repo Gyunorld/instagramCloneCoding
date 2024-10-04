@@ -8,8 +8,9 @@
 import Foundation
 
 //struct Post: Encodable, Decodable {
-struct Post: Codable {
+struct Post: Codable, Identifiable {
     let id: String
+    let userId: String
     let caption: String
     var like: Int
     let imageUrl: String
