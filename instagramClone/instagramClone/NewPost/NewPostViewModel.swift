@@ -19,18 +19,21 @@ class NewPostViewModel {
     var uiImage: UIImage?
     
     func convertImage(item: PhotosPickerItem?) async {
-        guard let item = item else { return }
-        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
-        guard let uiImage = UIImage(data: data) else { return }
-        self.postImage = Image(uiImage: uiImage)
-        self.uiImage = uiImage
-        
+//        guard let item = item else { return }
+//        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+//        guard let uiImage = UIImage(data: data) else { return }
+//        self.postImage = Image(uiImage: uiImage)
+//        self.uiImage = uiImage
+        guard let imageSelection = await ImageManager.convertImage(item: item) else { return }
+        self.postImage = imageSelection.image
+        self.uiImage = imageSelection.uiImage
     }
     
     func uploadPost() async {
         
         guard let uiImage else { return }
-        guard let imageUrl = await uploadImage(uiImage: uiImage) else { return }
+//        guard let imageUrl = await uploadImage(uiImage: uiImage) else { return }
+        guard let imageUrl = await ImageManager.uploadImage(uiImage: uiImage, path: .post) else { return }
         guard let userId = AuthManager.shared.currentAuthUser?.uid else { return }
         
         // collection: 엑셀의 시트 , document : 열
@@ -45,23 +48,23 @@ class NewPostViewModel {
         }
     }
     
-    func uploadImage(uiImage: UIImage) async -> String? {
-        guard let imageData = uiImage.jpegData(compressionQuality: 0.5) else { return nil }
-        let fileName = UUID().uuidString
-        print("fileName:",fileName)
-        let reference = Storage.storage().reference(withPath: "/images/\(fileName)")
-        
-        do{
-           let metaData = try await reference.putDataAsync(imageData)
-            print("metaData:", metaData)
-            let url = try await reference.downloadURL()
-            return url.absoluteString
-        } catch {
-            print("DEBUG: Failed to upload image with erro \(error.localizedDescription)")
-            return nil
-        }
-
-    }
+//    func uploadImage(uiImage: UIImage) async -> String? {
+//        guard let imageData = uiImage.jpegData(compressionQuality: 0.5) else { return nil }
+//        let fileName = UUID().uuidString
+//        print("fileName:",fileName)
+//        let reference = Storage.storage().reference(withPath: "/images/\(fileName)")
+//        
+//        do{
+//           let metaData = try await reference.putDataAsync(imageData)
+//            print("metaData:", metaData)
+//            let url = try await reference.downloadURL()
+//            return url.absoluteString
+//        } catch {
+//            print("DEBUG: Failed to upload image with erro \(error.localizedDescription)")
+//            return nil
+//        }
+//
+//    }
     
     func clearData() {
         caption = ""
