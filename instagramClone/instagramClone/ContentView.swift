@@ -12,11 +12,11 @@ struct ContentView: View {
     @State var signupViewModel = SignupViewModel()
     
     var body: some View {
-        if AuthManager.shared.currentAuthUser != nil {
-            MainTabView()
-        } else {
+        if AuthManager.shared.currentUser == nil {
             LoginView()
                 .environment(signupViewModel)
+        } else {
+            MainTabView()
         }
     }
 }
