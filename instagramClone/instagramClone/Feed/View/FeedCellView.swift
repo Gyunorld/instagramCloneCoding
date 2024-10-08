@@ -16,7 +16,6 @@ struct FeedCellView: View {
     }
     
     var body: some View {
-        let _ = print("image loading completed")
         VStack {
 //            Image("image_dragon2")
             KFImage(URL(string: viewModel.post.imageUrl))
@@ -25,19 +24,24 @@ struct FeedCellView: View {
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .top) {
                     HStack {
-//                        Image("image_lion4")
-                        KFImage(URL(string: viewModel.post.user?.profileImageUrl ?? "person.circle"))
-                            .resizable()
-                            .frame(width: 35, height: 35)
-                            .clipShape(Circle())
-                            .overlay {
-                                Circle()
-                                    .stroke(Color(red: 191/255, green: 11/255, blue: 180/255), lineWidth: 2)
+                        NavigationLink {
+                            if let user = viewModel.post.user {
+                                ProfileView(viewModel: ProfileViewModel(user: user))
                             }
-//                        Text("Tiger")
-                        Text("\(viewModel.post.user?.username ?? "")")
-                            .foregroundStyle(.white)
-                            .bold()
+                        } label: {
+                            KFImage(URL(string: viewModel.post.user?.profileImageUrl ?? ""))
+                                .resizable()
+                                .frame(width: 35, height: 35)
+                                .clipShape(Circle())
+                                .overlay {
+                                    Circle()
+                                        .stroke(Color(red: 191/255, green: 11/255, blue: 180/255), lineWidth: 2)
+                                }
+
+                            Text("\(viewModel.post.user?.username ?? "")")
+                                .foregroundStyle(.white)
+                                .bold()
+                        }
                         Spacer()
                         Image(systemName: "line.3.horizontal")
                             .foregroundStyle(.white)

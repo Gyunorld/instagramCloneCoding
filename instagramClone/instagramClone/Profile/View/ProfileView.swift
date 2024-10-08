@@ -9,6 +9,7 @@ import SwiftUI
 import Kingfisher
 
 struct ProfileView: View {
+    @Environment(\.dismiss) var dismiss
     @State var viewModel = ProfileViewModel()
     
     let columns : [GridItem] = [
@@ -77,22 +78,37 @@ struct ProfileView: View {
                         .font(.callout)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
-                    NavigationLink {
-                        ProfileEditingView(viewModel: viewModel)
-                    } label: {
-                        Text("프로필 편집")
-                            .bold()
-                            .foregroundStyle(.black)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 35)
-                            .background(Color.gray.opacity(0.2))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .padding(.horizontal, 10)
-                            .padding(.top, 10)
+                    if viewModel.user?.isCurrentUser == true {
+                        NavigationLink {
+                            ProfileEditingView(viewModel: viewModel)
+                        } label: {
+                            Text("프로필 편집")
+                                .bold()
+                                .foregroundStyle(.black)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 35)
+                                .background(Color.gray.opacity(0.2))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .padding(.horizontal, 10)
+                                .padding(.top, 10)
+                        }
+                    } else {
+                        Button {
+                            print("followoing")
+                        } label: {
+                            Text("팔로우")
+                                .bold()
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 35)
+                                .background(.blue)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .padding(.horizontal, 10)
+                                .padding(.top, 10)
+                        }
                     }
                     Divider()
                         .padding()
-                    
                     
                     LazyVGrid(columns: columns, spacing: 2) { // 세로 간격 변경
                         ForEach(viewModel.posts) { post in
@@ -108,6 +124,19 @@ struct ProfileView: View {
                     }
                     
                     Spacer()
+                }
+            }
+        }
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    Task {
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "arrow.backward")
+                        .tint(.black)
                 }
             }
         }

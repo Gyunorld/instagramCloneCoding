@@ -35,6 +35,13 @@ class ProfileViewModel {
         self.bio = tempUser?.bio ?? ""
     }
     
+    init(user: User) {  // overloading
+        self.user = user
+        self.name = user.name
+        self.username = user.username
+        self.bio = user.bio ?? ""
+    }
+    
     func convertImage(item: PhotosPickerItem?) async {
 //        guard let item = item else { return }
 //        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
