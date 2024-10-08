@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 struct User: Codable {
     let id: String
@@ -14,4 +15,15 @@ struct User: Codable {
     var name: String
     var bio: String?
     var profileImageUrl: String?
+    
+    var isCurrentUser: Bool {
+        guard let currentUserId = AuthManager.shared.currentUser?.id else { return false }
+//        if id == currentUserId {
+//            return true
+//        } else {
+//            return false
+//        }
+        
+        return id == currentUserId
+    }
 }
