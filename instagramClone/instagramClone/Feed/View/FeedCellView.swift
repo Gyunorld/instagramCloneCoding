@@ -26,7 +26,7 @@ struct FeedCellView: View {
                 .overlay(alignment: .top) {
                     HStack {
 //                        Image("image_lion4")
-                        KFImage(URL(string: viewModel.post.user?.profileImageUrl ?? ""))
+                        KFImage(URL(string: viewModel.post.user?.profileImageUrl ?? "person.circle"))
                             .resizable()
                             .frame(width: 35, height: 35)
                             .clipShape(Circle())
