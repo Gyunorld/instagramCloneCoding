@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseAuth
 import Firebase
+import FirebaseFirestoreCombineSwift
 
 @Observable
 class AuthManager {
@@ -21,7 +22,7 @@ class AuthManager {
     init() {
         currentAuthUser = Auth.auth().currentUser
         Task {
-            await loadUserData()
+            await loadCurrentUserData()
         }
     }
     
@@ -57,21 +58,29 @@ class AuthManager {
         do{
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             currentAuthUser = result.user
-            await loadUserData()
+            await loadCurrentUserData()
         } catch {
             print("DEBUG:", error.localizedDescription)
         }
     }
     
-    func loadUserData() async {
+    func loadCurrentUserData() async {
         guard let userId = self.currentAuthUser?.uid else { return }
         do{
             self.currentUser = try await Firestore.firestore().collection("users").document(userId).getDocument(as: User.self)
-            print("currentUser:",currentUser)
-            let result = try await Firestore.firestore().collection("users").document(userId).getDocument()
-            print(result.data())
         } catch {
             print("DEBUG:", error.localizedDescription)
+        }
+    }
+    
+    func loadUserData(userId: String) async -> User? {
+//        guard let userId = self.currentAuthUser?.uid else { return }
+        do{
+            let user = try await Firestore.firestore().collection("users").document(userId).getDocument(as: User.self)
+            return user
+        } catch {
+            print("DEBUG:", error.localizedDescription)
+            return nil
         }
     }
     
@@ -79,6 +88,7 @@ class AuthManager {
         do {
             try Auth.auth().signOut()
             currentAuthUser = nil
+            currentUser = nil
         } catch {
             print("DEBUG:", error.localizedDescription)
         }

@@ -15,4 +15,6 @@ struct Post: Codable, Identifiable {
     var like: Int
     let imageUrl: String
     let date: Date
+    
+    var user: User?
 }
