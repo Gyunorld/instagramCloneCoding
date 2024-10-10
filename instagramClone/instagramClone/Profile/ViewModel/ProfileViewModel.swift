@@ -36,7 +36,7 @@ class ProfileViewModel {
     }
     
     init() {
-//        self.user = AuthManager.shared.currentUser
+        //        self.user = AuthManager.shared.currentUser
         let tempUser = AuthManager.shared.currentUser
         self.user = tempUser
         self.name = tempUser?.name ?? ""
@@ -59,11 +59,11 @@ class ProfileViewModel {
     }
     
     func convertImage(item: PhotosPickerItem?) async {
-//        guard let item = item else { return }
-//        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
-//        guard let uiImage = UIImage(data: data) else { return }
-//        self.profileImage = Image(uiImage: uiImage)
-//        self.uiImage = uiImage
+        //        guard let item = item else { return }
+        //        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+        //        guard let uiImage = UIImage(data: data) else { return }
+        //        self.profileImage = Image(uiImage: uiImage)
+        //        self.uiImage = uiImage
         guard let imageSelection = await ImageManager.convertImage(item: item) else { return }
         self.profileImage = imageSelection.image
         self.uiImage = imageSelection.uiImage
@@ -103,7 +103,7 @@ class ProfileViewModel {
             editedData["bio"] = bio
         }
         if let uiImage = self.uiImage {
-//            let imageUrl = await uploadImage(uiImage: uiImage)
+            //            let imageUrl = await uploadImage(uiImage: uiImage)
             guard let imageUrl = await ImageManager.uploadImage(uiImage: uiImage, path: .profile) else { return }
             editedData["profileImageUrl"] = imageUrl
         }
@@ -115,41 +115,45 @@ class ProfileViewModel {
         
     }
     
-//    func uploadImage(uiImage: UIImage) async -> String? {
-//        guard let imageData = uiImage.jpegData(compressionQuality: 0.5) else { return nil }
-//        let fileName = UUID().uuidString
-//        print("fileName:",fileName)
-//        let reference = Storage.storage().reference(withPath: "/profile/\(fileName)")
-//        
-//        do{
-//           let metaData = try await reference.putDataAsync(imageData)
-//            print("metaData:", metaData)
-//            let url = try await reference.downloadURL()
-//            return url.absoluteString
-//        } catch {
-//            print("DEBUG: Failed to upload image with error \(error.localizedDescription)")
-//            return nil
-//        }
-//
-//    }
- 
+    //    func uploadImage(uiImage: UIImage) async -> String? {
+    //        guard let imageData = uiImage.jpegData(compressionQuality: 0.5) else { return nil }
+    //        let fileName = UUID().uuidString
+    //        print("fileName:",fileName)
+    //        let reference = Storage.storage().reference(withPath: "/profile/\(fileName)")
+    //
+    //        do{
+    //           let metaData = try await reference.putDataAsync(imageData)
+    //            print("metaData:", metaData)
+    //            let url = try await reference.downloadURL()
+    //            return url.absoluteString
+    //        } catch {
+    //            print("DEBUG: Failed to upload image with error \(error.localizedDescription)")
+    //            return nil
+    //        }
+    //
+    //    }
+    
     func loadUserPosts() async {
-        do {
-            let documents = try await Firestore.firestore().collection("posts").order(by: "date", descending: true)
-                .whereField("userId", isEqualTo: user?.id ?? "").getDocuments().documents
-            
-            var posts: [Post] = []
-            for document in documents {
-                let post = try document.data(as: Post.self)
-                posts.append(post)
-            }
-            self.posts = posts
-        } catch {
-            print("DEBUG: Failed to load user posts with error \(error.localizedDescription)")
-        }
+        guard let userId = user?.id else { return }
+        guard let posts = await PostManager.loadUserPosts(userId: userId) else { return }
+        self.posts = posts
+        //        do {
+        //            let documents = try await Firestore.firestore().collection("posts").order(by: "date", descending: true)
+        //                .whereField("userId", isEqualTo: user?.id ?? "").getDocuments().documents
+        //
+        //            var posts: [Post] = []
+        //            for document in documents {
+        //                let post = try document.data(as: Post.self)
+        //                posts.append(post)
+        //            }
+        //            self.posts = posts
+        //        } catch {
+        //            print("DEBUG: Failed to load user posts with error \(error.localizedDescription)")
+        //        }
+        //    }
     }
 }
-
+    
 extension ProfileViewModel {
     func follow() {
         Task {
