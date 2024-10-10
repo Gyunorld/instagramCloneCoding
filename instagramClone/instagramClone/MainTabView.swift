@@ -13,13 +13,12 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $tabIndex) {
-//            Text("Feed")
             FeedView()
                 .tabItem {
                     Image(systemName: "house")
                 }
                 .tag(0) // tag로 이름 붙여주기
-            Text("Search")
+            SearchView()
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                 }
