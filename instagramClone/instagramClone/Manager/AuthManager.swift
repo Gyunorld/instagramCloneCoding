@@ -94,3 +94,69 @@ class AuthManager {
         }
     }
 }
+
+extension AuthManager {
+    func follow(userId: String?) async {
+        guard let currentUserId = currentUser?.id else { return }
+//        guard let userId = userId else { return }
+        guard let userId else { return }
+        do {
+            async let _ = try await Firestore.firestore()   // async let으로 동시에 저장할 수 있도록 함
+                .collection("following")
+                .document(currentUserId)
+                .collection("user-following")
+                .document(userId)
+                .setData([:])
+            
+            async let _ = try await Firestore.firestore()
+                .collection("follower")
+                .document(userId)
+                .collection("user-follower")
+                .document(currentUserId)
+                .setData([:])
+        } catch {
+            print("DEBUG: Error following user: \(error.localizedDescription)")
+        }
+    }
+    
+    func unfollow(userId: String?) async {
+        guard let currentUserId = currentUser?.id else { return }
+        guard let userId else { return }
+        do {
+            async let _ = try await Firestore.firestore()   // async let으로 동시에 저장할 수 있도록 함
+                .collection("following")
+                .document(currentUserId)
+                .collection("user-following")
+                .document(userId)
+                .delete()
+            
+            async let _ = try await Firestore.firestore()
+                .collection("follower")
+                .document(userId)
+                .collection("user-follower")
+                .document(currentUserId)
+                .delete()
+        } catch {
+            print("DEBUG: Error unfollowing user: \(error.localizedDescription)")
+        }
+    }
+    
+    func checkFollow(userId: String?) async -> Bool {
+        guard let currentUserId = currentUser?.id else { return false }
+        guard let userId else { return false }
+        
+        do {
+            let isFollowing = try await Firestore.firestore()   // async let으로 동시에 저장할 수 있도록 함
+                .collection("following")
+                .document(currentUserId)
+                .collection("user-following")
+                .document(userId)
+                .getDocument()
+                .exists
+            return isFollowing
+        } catch {
+            print("DEBUG: Error unfollowing user: \(error.localizedDescription)")
+            return false
+        }
+    }
+}

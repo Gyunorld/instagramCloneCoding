@@ -8,13 +8,16 @@
 import Foundation
 import FirebaseAuth
 
-struct User: Codable {
+struct User: Codable, Identifiable {
     let id: String
     let email: String
     var username: String
     var name: String
     var bio: String?
     var profileImageUrl: String?
+    var isFollowing: Bool?
+    
+    var userCountInfo: UserCountInfo?
     
     var isCurrentUser: Bool {
         guard let currentUserId = AuthManager.shared.currentUser?.id else { return false }

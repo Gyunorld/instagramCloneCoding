@@ -25,14 +25,26 @@ class ProfileViewModel {
     var profileImage: Image?
     var uiImage: UIImage?
     
+    var postCount: Int? {
+        user?.userCountInfo?.postCount
+    }
+    var followingCount: Int? {
+        user?.userCountInfo?.followingCount
+    }
+    var followerCount: Int? {
+        user?.userCountInfo?.followerCount
+    }
+    
     init() {
 //        self.user = AuthManager.shared.currentUser
         let tempUser = AuthManager.shared.currentUser
         self.user = tempUser
-        
         self.name = tempUser?.name ?? ""
         self.username = tempUser?.username ?? ""
         self.bio = tempUser?.bio ?? ""
+        Task {
+            await loadUserCountInfo()
+        }
     }
     
     init(user: User) {  // overloading
@@ -40,6 +52,10 @@ class ProfileViewModel {
         self.name = user.name
         self.username = user.username
         self.bio = user.bio ?? ""
+        Task {
+            await checkFollow()
+            await loadUserCountInfo()
+        }
     }
     
     func convertImage(item: PhotosPickerItem?) async {
@@ -131,5 +147,33 @@ class ProfileViewModel {
         } catch {
             print("DEBUG: Failed to load user posts with error \(error.localizedDescription)")
         }
+    }
+}
+
+extension ProfileViewModel {
+    func follow() {
+        Task {
+            await AuthManager.shared.follow(userId: user?.id)
+            user?.isFollowing = true
+            await loadUserCountInfo()
+        }
+    }
+    func unfollow() {
+        Task {
+            await AuthManager.shared.unfollow(userId: user?.id)
+            user?.isFollowing = false
+            await loadUserCountInfo()
+        }
+    }
+    func checkFollow() async{
+        let userId = user?.id
+        self.user?.isFollowing = await AuthManager.shared.checkFollow(userId: userId)
+    }
+}
+
+extension ProfileViewModel {
+    func loadUserCountInfo() async {
+        let userId = user?.id
+        self.user?.userCountInfo = await UserCountManager.loadUserCountInfo(userId: userId)
     }
 }
