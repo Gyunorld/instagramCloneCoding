@@ -10,7 +10,7 @@ import Kingfisher
 
 struct FeedCellView: View {
     @State var viewModel: FeedCellViewModel
-    
+    @State var isCommentShowing = false
     init(post: Post) {
         self.viewModel = FeedCellViewModel(post: post)
     }
@@ -51,8 +51,21 @@ struct FeedCellView: View {
                 }
             
             HStack {
-                Image(systemName: "heart")
-                Image(systemName: "bubble.right")
+                let isLike = viewModel.post.isLike ?? false
+                Button {
+                    Task {
+                        isLike ? await viewModel.unlike() : await viewModel.like()
+                    }
+                } label: {
+                    Image(systemName: isLike ? "heart.fill" : "heart")
+                        .foregroundStyle(isLike ? .red : .primary)
+                }
+                Button {
+                    isCommentShowing = true
+                } label: {
+                    Image(systemName: "bubble.right")
+                }
+ 
                 Image(systemName: "paperplane")
                 Spacer()
                 Image(systemName: "bookmark")
@@ -67,11 +80,15 @@ struct FeedCellView: View {
                 .font(.footnote)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
-            Text("댓글 25개 더보기")
-                .foregroundStyle(.gray)
-                .font(.footnote)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
+            Button {
+                isCommentShowing = true
+            } label: {
+                Text("댓글 \(viewModel.commentCount)개 더보기")
+                    .foregroundStyle(.gray)
+                    .font(.footnote)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+            }
             Text("\(viewModel.post.date.relativeTimeString())")
                 .foregroundStyle(.gray)
                 .font(.footnote)
@@ -79,9 +96,20 @@ struct FeedCellView: View {
                 .padding(.horizontal)
         }
         .padding(.bottom)
+        .sheet(isPresented: $isCommentShowing) {
+            CommentView(post:viewModel.post)
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: isCommentShowing) { oldValue, newValue in
+            if newValue == false {
+                Task {
+                    await viewModel.loadCommentCount()
+                }
+            }
+        }
     }
 }
 
-//#Preview {
-//    FeedCellView(post: Post(id: <#T##String#>, userId: <#T##String#>, caption: <#T##String#>, like: <#T##Int#>, imageUrl: <#T##String#>, date: <#T##Date#>))
-//}
+#Preview {
+    FeedCellView(post: Post(id: "iMP2FX2V6cDGwhMAodRw", userId: "GzaQsA3lFlaPyP9TJi9poTnEgG42", caption: "Panda", like: 0, imageUrl: "https://firebasestorage.googleapis.com:443/v0/b/instagramclone-a5529.appspot.com/o/images%2F4826A681-3158-43E0-AFD2-7D40E9CB2A39?alt=media&token=614cee3b-2b12-462f-bab5-1836fe8620b0", date: Date()))
+}
