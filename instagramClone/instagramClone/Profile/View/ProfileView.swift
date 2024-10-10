@@ -50,19 +50,19 @@ struct ProfileView: View {
                                 .padding(.bottom, 10)
                         }
                         VStack {
-                            Text("124")
+                            Text("\(viewModel.postCount ?? 0)")
                                 .fontWeight(.semibold)
                             Text("게시물")
                         }
                         .frame(maxWidth: .infinity)
                         VStack {
-                            Text("999")
+                            Text("\(viewModel.followerCount ?? 0)")
                                 .fontWeight(.semibold)
                             Text("팔로워")
                         }
                         .frame(maxWidth: .infinity)
                         VStack {
-                            Text("1403")
+                            Text("\(viewModel.followingCount ?? 0)")
                                 .fontWeight(.semibold)
                             Text("팔로잉")
                         }
@@ -93,15 +93,23 @@ struct ProfileView: View {
                                 .padding(.top, 10)
                         }
                     } else {
+                        let isFollowing = viewModel.user?.isFollowing ?? false
                         Button {
-                            print("followoing")
+                            if isFollowing {
+                                viewModel.unfollow()
+                            } else {
+                                viewModel.follow()
+                            }
                         } label: {
-                            Text("팔로우")
+//                            Text("팔로우")
+                            Text(isFollowing ? "팔로잉" : "팔로우")
                                 .bold()
-                                .foregroundStyle(.white)
+//                                .foregroundStyle(.white)
+                                .foregroundStyle(isFollowing ? .black : .white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 35)
-                                .background(.blue)
+//                                .background(.blue)
+                                .background(isFollowing ? .gray.opacity(0.4) : .blue)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .padding(.horizontal, 10)
                                 .padding(.top, 10)
@@ -126,6 +134,12 @@ struct ProfileView: View {
                     Spacer()
                 }
             }
+        }
+        .task {
+            await viewModel.loadUserCountInfo()
+        }
+        .refreshable {
+            await viewModel.loadUserCountInfo()
         }
         .navigationBarBackButtonHidden()
         .toolbar {
